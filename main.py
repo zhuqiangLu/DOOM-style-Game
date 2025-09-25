@@ -10,6 +10,7 @@ from object_handler import *
 from weapon import *
 from sound import *
 from pathfinding import *
+from settings import SOUND_ENABLED
 
 
 class Game:
@@ -34,7 +35,8 @@ class Game:
         self.weapon = Weapon(self)
         self.sound = Sound(self)
         self.pathfinding = PathFinding(self)
-        pg.mixer.music.play(-1)
+        if SOUND_ENABLED:
+            pg.mixer.music.play(-1)
 
     def update(self):
         self.player.update()

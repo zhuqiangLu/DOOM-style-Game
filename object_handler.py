@@ -1,5 +1,6 @@
 from sprite_object import *
 from npc import *
+from settings import ENEMY_COUNT, TORCHES_ENABLED
 from random import choices, randrange
 
 
@@ -16,35 +17,36 @@ class ObjectHandler:
         self.npc_positions = {}
 
         # spawn npc
-        self.enemies = 20  # npc count
+        self.enemies = ENEMY_COUNT  # npc count
         self.npc_types = [SoldierNPC, CacoDemonNPC, CyberDemonNPC]
         self.weights = [70, 20, 10]
         self.restricted_area = {(i, j) for i in range(10) for j in range(10)}
         self.spawn_npc()
 
         # sprite map
-        add_sprite(AnimatedSprite(game))
-        add_sprite(AnimatedSprite(game, pos=(1.5, 1.5)))
-        add_sprite(AnimatedSprite(game, pos=(1.5, 7.5)))
-        add_sprite(AnimatedSprite(game, pos=(5.5, 3.25)))
-        add_sprite(AnimatedSprite(game, pos=(5.5, 4.75)))
-        add_sprite(AnimatedSprite(game, pos=(7.5, 2.5)))
-        add_sprite(AnimatedSprite(game, pos=(7.5, 5.5)))
-        add_sprite(AnimatedSprite(game, pos=(14.5, 1.5)))
-        add_sprite(AnimatedSprite(game, pos=(14.5, 4.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(14.5, 5.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(14.5, 7.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(12.5, 7.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(9.5, 7.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(14.5, 12.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(9.5, 20.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(10.5, 20.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(3.5, 14.5)))
-        add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(3.5, 18.5)))
-        add_sprite(AnimatedSprite(game, pos=(14.5, 24.5)))
-        add_sprite(AnimatedSprite(game, pos=(14.5, 30.5)))
-        add_sprite(AnimatedSprite(game, pos=(1.5, 30.5)))
-        add_sprite(AnimatedSprite(game, pos=(1.5, 24.5)))
+        if TORCHES_ENABLED:
+            add_sprite(AnimatedSprite(game))
+            add_sprite(AnimatedSprite(game, pos=(1.5, 1.5)))
+            add_sprite(AnimatedSprite(game, pos=(1.5, 7.5)))
+            add_sprite(AnimatedSprite(game, pos=(5.5, 3.25)))
+            add_sprite(AnimatedSprite(game, pos=(5.5, 4.75)))
+            add_sprite(AnimatedSprite(game, pos=(7.5, 2.5)))
+            add_sprite(AnimatedSprite(game, pos=(7.5, 5.5)))
+            add_sprite(AnimatedSprite(game, pos=(14.5, 1.5)))
+            add_sprite(AnimatedSprite(game, pos=(14.5, 4.5)))
+            add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(14.5, 5.5)))
+            add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(14.5, 7.5)))
+            add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(12.5, 7.5)))
+            add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(9.5, 7.5)))
+            add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(14.5, 12.5)))
+            add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(9.5, 20.5)))
+            add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(10.5, 20.5)))
+            add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(3.5, 14.5)))
+            add_sprite(AnimatedSprite(game, path=self.anim_sprite_path + 'red_light/0.png', pos=(3.5, 18.5)))
+            add_sprite(AnimatedSprite(game, pos=(14.5, 24.5)))
+            add_sprite(AnimatedSprite(game, pos=(14.5, 30.5)))
+            add_sprite(AnimatedSprite(game, pos=(1.5, 30.5)))
+            add_sprite(AnimatedSprite(game, pos=(1.5, 24.5)))
 
         # npc map
         # add_npc(SoldierNPC(game, pos=(11.0, 19.0)))
@@ -65,7 +67,8 @@ class ObjectHandler:
                 self.add_npc(npc(self.game, pos=(x + 0.5, y + 0.5)))
 
     def check_win(self):
-        if not len(self.npc_positions):
+        # Trigger win only if enemies were configured; with 0 enemies, run infinitely
+        if self.enemies and not len(self.npc_positions):
             self.game.object_renderer.win()
             pg.display.flip()
             pg.time.delay(1500)
