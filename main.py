@@ -10,7 +10,7 @@ from object_handler import *
 from weapon import *
 from sound import *
 from pathfinding import *
-from settings import SOUND_ENABLED
+from settings import SOUND_ENABLED, BIRD_VIEW
 
 
 class Game:
@@ -50,7 +50,8 @@ class Game:
     def draw(self):
         # self.screen.fill('black')
         self.object_renderer.draw()
-        self.weapon.draw()
+        if not BIRD_VIEW:
+            self.weapon.draw()
         # self.map.draw()
         # self.player.draw()
 
