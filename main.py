@@ -10,6 +10,7 @@ from object_handler import *
 from weapon import *
 from sound import *
 from pathfinding import *
+from autopilot import AutoPilot
 from settings import SOUND_ENABLED, BIRD_VIEW
 
 
@@ -35,6 +36,8 @@ class Game:
         self.weapon = Weapon(self)
         self.sound = Sound(self)
         self.pathfinding = PathFinding(self)
+        # attach autopilot controller
+        self.autopilot = AutoPilot(self, enabled=AUTOPILOT)
         if SOUND_ENABLED:
             pg.mixer.music.play(-1)
 

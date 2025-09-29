@@ -111,8 +111,12 @@ class Player:
         self.angle += self.rel * MOUSE_SENSITIVITY * self.game.delta_time
 
     def update(self):
-        self.movement()
-        self.mouse_control()
+        # If autopilot is enabled, let it drive movement instead of keyboard
+        if hasattr(self.game, 'autopilot') and self.game.autopilot and self.game.autopilot.enabled:
+            self.game.autopilot.update()
+        else:
+            self.movement()
+            self.mouse_control()
         self.recover_health()
 
     @property

@@ -19,6 +19,14 @@ SOUND_ENABLED = False
 BIRD_VIEW = True
 BIRD_VIEW_SHOW_DIRECTION = False
 
+# headless and automation
+HEADLESS = False  # if True, run without opening a window and skip flips
+AUTOPILOT = False  # if True, player is controlled by auto-routing instead of keyboard
+
+# top-down overlay settings
+TOP_DOWN_OVERLAY = False  # if True, render a mini bird's-eye overlay
+TOP_DOWN_OVERLAY_SIZE = (360, 240)  # width, height in pixels
+
 MOUSE_SENSITIVITY = 0.0003
 MOUSE_MAX_REL = 40
 MOUSE_BORDER_LEFT = 100
