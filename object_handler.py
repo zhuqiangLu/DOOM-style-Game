@@ -1,6 +1,8 @@
 from sprite_object import *
 from npc import *
-from settings import ENEMY_COUNT, TORCHES_ENABLED
+from settings import ENEMY_COUNT, TORCHES_ENABLED, RANDOM_ASSET_PATH, RANDOM_ASSET_IS_ANIMATED, RANDOM_ASSET_SCALE, RANDOM_ASSET_SHIFT, RANDOM_ASSET_ANIMATION_TIME
+import os
+import random
 from random import choices, randrange
 
 
@@ -22,6 +24,8 @@ class ObjectHandler:
         self.weights = [70, 20, 10]
         self.restricted_area = {(i, j) for i in range(10) for j in range(10)}
         self.spawn_npc()
+
+        # random asset placement will be triggered after autopilot initializes (in main)
 
         # sprite map
         if TORCHES_ENABLED:
@@ -85,3 +89,48 @@ class ObjectHandler:
 
     def add_sprite(self, sprite):
         self.sprite_list.append(sprite)
+
+    def spawn_random_assets(self, asset_path, count):
+        # Use all generated waypoints (including skipped ones) if available
+        waypoint_cells = []
+        if hasattr(self.game, 'autopilot') and self.game.autopilot and getattr(self.game.autopilot, 'all_waypoints', None):
+            waypoint_cells = list(self.game.autopilot.all_waypoints)
+
+        # fallback: choose random free cells
+        if not waypoint_cells:
+            waypoint_cells = self.game.map.free_cells()
+
+        # limit to requested count
+        waypoint_cells = waypoint_cells[:max(0, int(count))]
+
+        # avoid spawning on the player cell
+        taken = set()
+        px, py = int(self.game.player.x), int(self.game.player.y)
+        taken.add((px, py))
+
+        # resolve animated path to a frame file if a directory is provided
+        resolved_path = asset_path
+        if RANDOM_ASSET_IS_ANIMATED and os.path.isdir(asset_path):
+            # try common first frame name, else pick first file in directory
+            candidate = os.path.join(asset_path, '0.png')
+            if os.path.isfile(candidate):
+                resolved_path = candidate
+            else:
+                files = [f for f in os.listdir(asset_path) if os.path.isfile(os.path.join(asset_path, f))]
+                if files:
+                    resolved_path = os.path.join(asset_path, files[0])
+
+        # get waypoint colors for tinting
+        colors = globals().get('WAYPOINT_COLORS', {})
+        color_list = list(colors.values()) if colors else []
+        for i, cell in enumerate(waypoint_cells):
+            if cell in taken or cell in self.game.map.world_map:
+                continue
+            taken.add(cell)
+            cx, cy = cell
+            # use corresponding waypoint color for tinting
+            color = color_list[i] if i < len(color_list) else None
+            if RANDOM_ASSET_IS_ANIMATED:
+                self.add_sprite(AnimatedSprite(self.game, path=resolved_path, pos=(cx + 0.5, cy + 0.5), scale=RANDOM_ASSET_SCALE, shift=RANDOM_ASSET_SHIFT, animation_time=RANDOM_ASSET_ANIMATION_TIME, color=color))
+            else:
+                self.add_sprite(SpriteObject(self.game, path=resolved_path, pos=(cx + 0.5, cy + 0.5), scale=RANDOM_ASSET_SCALE, shift=RANDOM_ASSET_SHIFT, color=color))

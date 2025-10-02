@@ -6,7 +6,7 @@ from collections import deque
 
 class SpriteObject:
     def __init__(self, game, path='resources/sprites/static_sprites/candlebra.png',
-                 pos=(10.5, 3.5), scale=0.7, shift=0.27):
+                 pos=(10.5, 3.5), scale=0.7, shift=0.27, color=None):
         self.game = game
         self.player = game.player
         self.x, self.y = pos
@@ -18,12 +18,20 @@ class SpriteObject:
         self.sprite_half_width = 0
         self.SPRITE_SCALE = scale
         self.SPRITE_HEIGHT_SHIFT = shift
+        self.color = color  # optional color tint
 
     def get_sprite_projection(self):
         proj = SCREEN_DIST / self.norm_dist * self.SPRITE_SCALE
         proj_width, proj_height = proj * self.IMAGE_RATIO, proj
 
         image = pg.transform.scale(self.image, (proj_width, proj_height))
+        
+        # apply color tint if specified
+        if self.color:
+            # create a colored overlay and blend it
+            color_surface = pg.Surface(image.get_size(), pg.SRCALPHA)
+            color_surface.fill(self.color)
+            image.blit(color_surface, (0, 0), special_flags=pg.BLEND_MULT)
 
         self.sprite_half_width = proj_width // 2
         height_shift = proj_height * self.SPRITE_HEIGHT_SHIFT
@@ -55,8 +63,8 @@ class SpriteObject:
 
 class AnimatedSprite(SpriteObject):
     def __init__(self, game, path='resources/sprites/animated_sprites/green_light/0.png',
-                 pos=(11.5, 3.5), scale=0.8, shift=0.16, animation_time=120):
-        super().__init__(game, path, pos, scale, shift)
+                 pos=(11.5, 3.5), scale=0.8, shift=0.16, animation_time=120, color=None):
+        super().__init__(game, path, pos, scale, shift, color)
         self.animation_time = animation_time
         self.path = path.rsplit('/', 1)[0]
         self.images = self.get_images(self.path)
@@ -72,6 +80,11 @@ class AnimatedSprite(SpriteObject):
         if self.animation_trigger:
             images.rotate(-1)
             self.image = images[0]
+            # reapply color tint after animation
+            if self.color:
+                color_surface = pg.Surface(self.image.get_size(), pg.SRCALPHA)
+                color_surface.fill(self.color)
+                self.image.blit(color_surface, (0, 0), special_flags=pg.BLEND_MULT)
 
     def check_animation_time(self):
         self.animation_trigger = False
